@@ -77,20 +77,20 @@ Fwg = 1 / 5     # view factor wall - glass
 
 # Decisive Values for the model and certain simulations
 
-Kp = 1000   #gain for the heater
-T_out = -5  # outside temperature
+Kp = 500   #gain for the heater
+T_out = 10  # outside temperature
 T_set = 20  # set temperature for inside the room
 T_set_day = 22 # set temperature for inside the room in the day, intermittent heating
 T_set_night = 16 # set temperature for inside the room in the night, intermittent heating
-Qa = 1000   # heat source inside the room
+Qa = 1000   # auxiliary heat source inside the room
 Phi_out = 0      # radiation outside (wall), Φo
-Phi_in = 0      # radioation inside (through window and in room absorbed), Φi
+Phi_in = 0      # radiation inside (through window and in room absorbed), Φi
 Phi_abs = 0      # radiation absorbed (glass), Φa
 neglect_glass = True # do we neglect the capacity of the glass or not
-neglect_air = True    # do we neglect capacity of air inside
+neglect_air = False    # do we neglect capacity of air inside
 X_time = 0.8    # Factor of shrinking time step to stabilize the y_exp
 
-weather_data_year = '2012'  # arbitary year for heat hours calculation, reference for weather data
+weather_data_year = '2012'  # arbitary year for weather simulations, reference for weather data
 starting_day = '-01-03' # -mm-dd day for starting weather simulations
 starting_time = '10:00:00'  # hh:mm:ss time for starting weather simulations
 ending_day = '-02-09'  # -mm-dd day for ending weather simulations
@@ -285,7 +285,10 @@ b[[0, 8, 10]] = T_out      # outdoor temperature
 b[[11]] = T_set          # indoor set-point temperature
 
 f = np.zeros(8)         # flow-rate sources
-f[6] = Qa               # no consideration of radiation
+f[0] = Phi_out          # radiation absorbed in outside wall
+f[4] = Phi_in           # radiation absorbed in inside wall
+f[6] = Qa               # auxiliary heat source inside
+f[7] = Phi_abs          # radiation absorbed in window
 
 G = np.diag(G)
 C = np.diag(C)
@@ -332,7 +335,7 @@ print(f'Settling time: \
 {t_settle:.0f} s = \
 {t_settle / 60:.1f} min = \
 {t_settle / (3600):.2f} h = \
-{t_settle / (3600 * 24):.2f} days')
+{t_settle / (3600 * 24):.2f} days\n')
 
 # Step response
 # -------------
@@ -476,7 +479,7 @@ u_wheather = u_wheather.fillna(0)
 # Initial conditions
 θ_exp_weather = T_set * np.ones([As.shape[0], u_wheather.shape[0]])
 
-print('Overview of u vector:')
+print('Overview of u vector, begin of simulation:')
 print(u_wheather.iloc[0, :])
 
 
